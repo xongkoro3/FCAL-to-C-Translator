@@ -1,0 +1,244 @@
+#include "AST.h"
+
+using namespace std ;
+
+string Root::unparse() {
+    return varName->unparse() + " () {\n" + stmts->unparse() + "}\n";
+}
+
+string Root::cppCode() {
+    string s = "#include <iostream>\n#include \"Matrix.h\"\n#include <math.h>\n\nusing namespace std;\n";
+    s +="int " + varName->cppCode() + " () {\n" + stmts->cppCode() + "}\n";
+    return s;
+}
+////////////////////////////////////////////////
+//
+//	STATEMENTS CLASS AND DERIVATES
+//
+////////////////////////////////////////////////
+
+string EmptyStmts::unparse() {
+    return "";
+}
+
+string EmptyStmts::cppCode() {
+    return "";
+}
+
+string StmtStmts::unparse() {
+    return stmt->unparse() + stmts->unparse();
+}
+
+string StmtStmts::cppCode() {
+    return stmt->cppCode() + stmts->cppCode();
+}
+
+////////////////////////////////////////////////
+//
+//	STATEMENT CLASS AND DERIVATES
+//
+////////////////////////////////////////////////
+
+string StandardDecl::unparse() {
+    return typeKeyword + " " + varName->unparse() + ";\n";
+}
+
+string StandardDecl::cppCode() {
+    string newKeyword;
+    if(typeKeyword.compare("Int")==0) {
+        newKeyword = "int";
+    }
+    if(typeKeyword.compare("Float")==0) {
+        newKeyword = "float";
+    }
+    if(typeKeyword.compare("Str")==0) {
+        newKeyword = "string";
+    }
+    if(typeKeyword.compare("Bool")==0) {
+        newKeyword = "bool";
+    }
+    return newKeyword + " " + varName->cppCode() + ";\n";
+}
+
+string MatrixAdvDecl::unparse() {
+    string s = "";
+    s += "Matrix " + varName1->unparse() + " [ " + expr1->unparse() + "," + expr2->unparse() + "] ";
+    s += varName2->unparse() + " , " + varName3->unparse() + " = " + expr3->unparse() + ";\n";
+    return s;
+}
+
+string MatrixAdvDecl::cppCode() {
+    // @TODO
+    // Need to create a matrix class before this can be done
+    //return "CPP FOR MATRIX ADV DECL";
+    string s = "";
+    s += "Matrix " + varName1->cppCode() + " [ " + expr1->cppCode() + "," + expr2->cppCode() + "] ";
+    s += varName2->cppCode() + " , " + varName3->cppCode() + " = " + expr3->cppCode() + ";\n";
+    return s;
+}
+
+string MatrixDecl::unparse() {
+    return "Matrix " + varName->unparse() + " = " + expr->unparse() + ";\n";
+}
+
+string MatrixDecl::cppCode() {
+    // @TODO
+    // Need to create a matrix class before this can be done
+    return "Matrix " + varName->cppCode() + " = " + expr->cppCode() + ";\n";
+}
+
+string StmtBlock::unparse() {
+    return "{\n" + stmts->unparse() + "}";
+}
+
+string StmtBlock::cppCode() {
+    return "{\n" + stmts->cppCode() + "}";
+}
+
+string IfStmt::unparse() {
+    return "if ( " + expr->unparse() + " ) " + stmt->unparse();
+}
+
+string IfStmt::cppCode() {
+    return "if ( " + expr->cppCode() + " ) " + stmt->cppCode();
+}
+
+string IfElseStmt::unparse() {
+    string s = "";
+    s+= "if (" + expr->unparse() + ") " + stmt1->unparse();
+    s+= " else " + stmt2->unparse() + "\n";
+    return s;
+}
+
+string IfElseStmt::cppCode() {
+    string s = "";
+    s+= "if (" + expr->cppCode() + ") " + stmt1->cppCode();
+    s+= " else " + stmt2->cppCode() + "\n";
+    return s;
+}
+
+string StandardAssignStmt::unparse() {
+    return varName->unparse() + " = " + expr->unparse() + ";\n";
+}
+
+string StandardAssignStmt::cppCode() {
+    return varName->cppCode() + " = " + expr->cppCode() + ";\n";
+}
+
+string MatrixAssignStmt::unparse() {
+    return varName->unparse() + "[" + expr1->unparse() + "," + expr2->unparse() + "] = " + expr3->unparse() + ";\n" ;
+}
+
+string MatrixAssignStmt::cppCode() {
+    // @TODO
+    // Need to implement matrix class before we can define this
+    return varName->cppCode() + "[" + expr1->cppCode() + "," + expr2->cppCode() + "] = " + expr3->cppCode() + ";\n" ;
+}
+
+string PrintStmt::unparse() {
+    return "print(" + expr->unparse() + ");\n";
+}
+
+string PrintStmt::cppCode() {
+    return "cout << " + expr->cppCode() + " ;\n";
+}
+
+string ForStmt::unparse() {
+    return "for(" + varName->unparse() + "=" + expr1->unparse() + " : " + expr2->unparse() + ")" + stmt->unparse() + "\n";
+}
+
+string ForStmt::cppCode() {
+    return "for(" + varName->cppCode() + "=" + expr1->cppCode() + " ; " + varName->cppCode() + "<=" + expr2->cppCode() + ";" + varName->cppCode() + "++ )\n" + stmt->cppCode() + "\n";
+}
+
+string WhileStmt::unparse() {
+    return "while(" + expr->unparse() + ")" + stmt->unparse() + "\n";
+}
+
+string WhileStmt::cppCode() {
+    return "while(" + expr->cppCode() + ")" + stmt->cppCode() + "\n";
+}
+
+////////////////////////////////////////////////
+//
+//	EXPR CLASS AND DERIVATES
+//
+////////////////////////////////////////////////
+
+string VarName::unparse() {
+    return lexeme;
+}
+
+string VarName::cppCode() {
+    return lexeme;
+}
+
+string AnyConst::unparse() {
+    return constString;
+}
+
+string AnyConst::cppCode() {
+    return constString;
+}
+
+string BinOpExpr::unparse() {
+    return left->unparse() + " " + op + " " + right->unparse();
+}
+
+string BinOpExpr::cppCode() {
+    return left->cppCode() + " " + op + " " + right->cppCode();
+}
+
+string MatrixRefExpr::unparse() {
+    return varName->unparse() + "[" + expr1->unparse() + "," + expr2->unparse() + "]";
+}
+
+string MatrixRefExpr::cppCode() {
+    // @TODO
+    // Need to implement matrix class first
+    return varName->cppCode() + "[" + expr1->cppCode() + "," + expr2->cppCode() + "]";
+}
+
+string FunctionCall::unparse() {
+    return varName->unparse() + "(" + expr->unparse() + ")";
+}
+
+string FunctionCall::cppCode() {
+    return varName->cppCode() + "(" + expr->cppCode() + ")";
+}
+
+string ParensExpr::unparse() {
+    return "(" + expr->unparse() + ")";
+}
+
+string ParensExpr::cppCode() {
+    return "(" + expr->cppCode() + ")";
+}
+
+string LetExpr::unparse() {
+    return "let " + stmts->unparse() + " in " + expr->unparse() + " end ";
+}
+
+string LetExpr::cppCode() {
+    return "({ " + stmts->cppCode() + " ( " + expr->cppCode() + " ); " + "})";
+}
+
+string IfExpr::unparse() {
+    return "if " + expr1->unparse() + " then " + expr2->unparse() + " else " + expr3->unparse();
+}
+
+string IfExpr::cppCode() {
+    // C++ doesn't have if then else, so just using IfElseStmt::cppCode()
+    string s = "";
+    s+= "if (" + expr1->cppCode() + ") {\n" + expr2->cppCode();
+    s+= " \n} else { " + expr3->cppCode() + "}\n";
+    return s;
+}
+
+string NotExpr::unparse() {
+    return "!" + expr->unparse();
+}
+
+string NotExpr::cppCode() {
+    return "!" + expr->cppCode();
+}

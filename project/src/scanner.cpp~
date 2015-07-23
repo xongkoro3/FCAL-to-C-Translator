@@ -1,0 +1,157 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <iostream>
+
+#include <regex.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include "regex.h"
+#include "scanner.h"
+
+using namespace std;
+
+Token::Token (string _lexeme, tokenType _terminal, Token *_next) {
+    lexeme = _lexeme;
+    terminal = _terminal;
+    next = _next ;
+}
+
+Token * Scanner::matchNextToken(const char *text) {
+    int maxNumMatchedChars = 0, numMatchedChars = 0, token_holder;
+    tokenType token_value;
+    string lexeme = "";
+    for (int i=intKwd; i != lexicalError + 1; i++){
+        numMatchedChars = matchRegex(regexes[i], text);
+        if (numMatchedChars > maxNumMatchedChars) {
+            maxNumMatchedChars = numMatchedChars;
+            token_holder = i;
+            lexeme.assign(text, numMatchedChars);
+        }
+    }
+    token_value = static_cast<tokenType>(token_holder);
+    return new Token(lexeme, token_value, NULL) ;
+}
+
+
+
+Token * Scanner::scan(const char *text) {
+    
+    regex_t *whiteSpace ;
+    whiteSpace = makeRegex ("^[\n\t\r ]+") ;
+    
+    regex_t *blockComment ;
+    blockComment = makeRegex ("^/\\*([^\\*]|\\*+[^\\*/])*\\*+/") ;
+    
+    regex_t *lineComment ;
+    lineComment = makeRegex ("^//[^\n]*\n") ;
+    
+    Token *startingToken = NULL ;
+    Token *curToken = startingToken ;
+    Token *newestToken = startingToken ;
+    int numMatchedChars = consumeWhiteSpaceAndComments(whiteSpace, blockComment, lineComment, text) ;
+    text = text + numMatchedChars ;
+    while ( text[0] != '\0') {
+        
+        newestToken = matchNextToken(text) ;
+        if (startingToken == NULL) {
+            startingToken = newestToken;
+            curToken = newestToken;
+        } else {
+            curToken->next = newestToken ;
+            curToken = newestToken ;
+        }
+        text = text + curToken->lexeme.length();
+        numMatchedChars = consumeWhiteSpaceAndComments(whiteSpace, blockComment, lineComment, text) ;
+        text = text + numMatchedChars;
+    }
+    newestToken = new Token("endOfFile", endOfFile, NULL);
+    if (startingToken == NULL) {
+        return newestToken;
+    }
+    curToken->next = newestToken;
+    return startingToken;
+}
+
+int Scanner::matchRegex (regex_t *re, const char *text) {
+    int status ;
+    const int nsub=1 ;
+    regmatch_t matches[nsub] ;
+    
+    /* execute the regular expression match against the text.  If it
+     matches, the beginning and ending of the matched text are stored
+     in the first element of the matches array.
+     */
+    status = regexec(re, text, (size_t)nsub, matches, 0);
+    
+    if (status==REG_NOMATCH) {
+        return 0 ;
+    }
+    else {
+        return matches[0].rm_eo ;
+    }
+}
+
+regex_t* Scanner::makeRegex (const char* pattern) {
+    regex_t *re = new regex_t ;
+    int rc ;
+    
+    /* "Compile" the regular expression.  This sets up the regex to do
+     the matching specified by the regular expression given as a
+     character string.
+     */
+    rc = regcomp(re, pattern, REG_EXTENDED) ;
+    
+    if (rc!= 0) {
+        // printf ("Error in compiling regular expression.\n");
+        size_t length = regerror (rc, re, NULL, 0) ;
+        char *buffer = (char *) malloc( sizeof(char) * length ) ;
+        (void) regerror (rc, re, buffer, length) ;
+        // printf ("%s\n", buffer);
+        
+        delete re ;
+        return NULL;
+    }
+    else
+    return re ;
+}
+
+int Scanner::consumeWhiteSpaceAndComments (regex_t *whiteSpace,
+                                           regex_t *blockComment,
+                                           regex_t *lineComment,
+                                           const char *text) {
+    int numMatchedChars = 0 ;
+    int totalNumMatchedChars = 0 ;
+    int stillConsumingWhiteSpace ;
+    
+    do {
+        stillConsumingWhiteSpace = 0 ; // exit loop if not reset by a match
+        
+        // Try to match white space
+        numMatchedChars = matchRegex (whiteSpace, text) ;
+        totalNumMatchedChars += numMatchedChars ;
+        if (numMatchedChars > 0) {
+            text = text + numMatchedChars ;
+            stillConsumingWhiteSpace = 1 ;
+        }
+        
+        // Try to match block comments
+        numMatchedChars = matchRegex (blockComment, text) ;
+        totalNumMatchedChars += numMatchedChars ;
+        if (numMatchedChars > 0) {
+            text = text + numMatchedChars ;
+            stillConsumingWhiteSpace = 1 ;
+        }
+        
+        // Try to match single-line comments
+        numMatchedChars = matchRegex (lineComment, text) ;
+        totalNumMatchedChars += numMatchedChars ;
+        if (numMatchedChars > 0) {
+            text = text + numMatchedChars ;
+            stillConsumingWhiteSpace = 1 ;
+        }
+    }
+    while ( stillConsumingWhiteSpace ) ;
+    
+    return totalNumMatchedChars ;
+}
+

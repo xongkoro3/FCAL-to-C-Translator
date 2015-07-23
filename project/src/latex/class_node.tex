@@ -1,0 +1,39 @@
+\hypertarget{class_node}{}\section{Node Class Reference}
+\label{class_node}\index{Node@{Node}}
+
+
+{\ttfamily \#include $<$A\+S\+T.\+h$>$}
+
+Inheritance diagram for Node\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=8.380953cm]{class_node}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+virtual \hyperlink{class_node_af5e3fa79300bf5f3f2f3ecae6e795a94}{$\sim$\+Node} ()
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+This is the super class. It's the base class for all nodes. \hyperlink{class_program}{Program}, \hyperlink{class_stmt}{Stmt}, \hyperlink{class_stmts}{Stmts}, \hyperlink{class_decl}{Decl}, \hyperlink{class_decls}{Decls}, and \hyperlink{class_expr}{Expr} are all derived from this class. 
+
+\subsection{Constructor \& Destructor Documentation}
+\hypertarget{class_node_af5e3fa79300bf5f3f2f3ecae6e795a94}{}\index{Node@{Node}!````~Node@{$\sim$\+Node}}
+\index{````~Node@{$\sim$\+Node}!Node@{Node}}
+\subsubsection[{$\sim$\+Node}]{\setlength{\rightskip}{0pt plus 5cm}virtual Node\+::$\sim$\+Node (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [virtual]}}\label{class_node_af5e3fa79300bf5f3f2f3ecae6e795a94}
+This is a virtual method that returns unparse texts -\/ commented out for now.
+
+virtual std\+::string unparse ( ) \{ return \char`\"{} This should be pure virtual \char`\"{};\} ; virtual std\+::string cpp\+Code ( ) \{ return \char`\"{} This should be pure virtual\char`\"{} ; \} ;
+
+This is the virtual destructor. This function deletes the node and deallocates space. 
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+A\+S\+T.\+h\end{DoxyCompactItemize}

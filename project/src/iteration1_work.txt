@@ -1,0 +1,5 @@
+Division of Labor Statement
+
+My partner and I split up the work with the aim of learning together. Therefore we both made contributions to the project. 
+- We pair-programmed and wrote scanner.cpp as well as scanner.h together, and contributed an equal amount of work on those 2 files.
+- Chau wrote the test cases in scanner_tests.h. 

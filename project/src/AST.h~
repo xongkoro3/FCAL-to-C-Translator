@@ -1,0 +1,224 @@
+#define Node_H
+
+#include <string>
+#include <iostream> 
+#include <stdio.h>
+
+#include "scanner.h"
+
+class Node ;
+
+class Expr;
+class Program;
+class Stmts;
+class Stmt;
+class Decl;
+
+class Root;
+
+class TwoStmts;
+class EmptyStmts;
+
+class declStmt;
+class parenStmt;
+class ifStmt;
+class ifelseStmt;
+class regVarStmt;
+class matricVarStmt;
+class printStmt;
+class loopStmt;
+class whileStmt;
+class endStmt;
+
+class intDecl;
+class floatDecl;
+class stringDecl;
+class boolDecl;
+class matrixLongDecl;
+class matrixShortDecl;
+
+class varNameExpr;
+class AnyConstExpr;
+class BoolKwdExpr;
+class BinOpExpr;
+class matrixREfExpr;
+class nestedOrFunctionCallExpr;
+class parenExpr;
+class letExpr;
+class ifelseExpr;
+class notExpr;
+
+//Node - the Super Class
+class Node {
+	public:
+		virtual std::string unparse ( ) { return " This should be pure virtual ";} ;
+		virtual std::string cppCode ( ) { return " This should be pure virtual" ; } ;
+		virtual ~Node() { }
+};
+
+//Program Class
+class Program: public Node {
+public:
+    Program(VarNameExpr *v, Stmts *s);
+    std::string unparse();
+    virtual ~Root();
+private:
+    VarNameExpr * varName;
+    Stmts * stmts;
+    Root();
+    Root(const Root &);
+};
+ 
+//Stmts Class
+class Stmts : public Node
+{
+};
+
+// EmptyStmts
+class EmptyStmts : public Stmts
+{
+	public:
+		EmptyStmts();
+		std::string unparse();
+	private:
+		EmptyStmts(const EmptyStmts &);
+};
+
+// TwoStmts
+class TwoStmts : public Stmts
+{
+	public:
+		TwoStmts(Stmt *_stmt, Stmts *_stmts);
+		std::string unparse();
+	private:
+		Stmt *stmt;
+		Stmts *stmts;
+		TwoStmts(const TwoStmts &);
+};
+
+//Stmt Class
+
+
+class Stmt : public Node
+{
+}
+
+class declStmt: public Stmt
+{
+}
+class parenStmt: public Stmt
+{
+};
+class ifStmt: public Stmt
+{
+	public:
+		ifStmt(Expr*, Stmt*);
+		std::string unparse();
+		
+		Expr *expr1;
+		Stmt *stmt1;		
+};
+class ifelseStmt: public Stmt
+{
+	public:
+		ifelseStmt(Expr*, Stmt*, Stmt*);
+		std::string unparse();
+		
+		Expr* expr1;
+		Stmt* 
+};
+class regVarStmt: public Stmt
+{
+};
+class matricVarStmt: public Stmt
+{
+};
+class printStmt: public Stmt
+{
+};
+class loopStmt: public Stmt{
+	
+};
+class whileStmt: public Stmt{
+	
+};
+class endStmt: public Stmt{
+	
+};
+
+
+
+//Decl Class
+
+
+
+//Expr Class
+class Expr: public Node {};
+
+//Expr ::= integerConst | floatConst | stringConst
+class AnyConstExpr: public Expr {
+    public: //constructor
+        AnyConstExpr(std::string s){
+			constString = s;
+		};
+        std::string unparse();
+    private:
+        std::string constString;
+};
+
+
+//Expr ::= Expr '<binaryOp>' Expr
+class BinOpExpr: public Expr {
+public:
+    BinOpExpr(Expr *l, std:: string o, Expr *r):
+    {
+		left = l;
+		op = o;
+		right = r;
+	};
+    std::string unparse();
+private:
+    Expr* left;
+    std:: string op;
+    Expr* right;
+};
+
+
+//Expr ::= varName
+class VarNameExpr: public Expr {
+public:
+    VarName(std:: string s): 
+    {
+		var = s;
+	};
+    std::string unparse();
+private:
+    std:: string var;
+};
+
+//Expr ::= trueKwd | falseKwd
+class BoolKwdExpr: public Expr {
+public:
+    BoolKwdExpr(std:: string s){
+		bool = s;
+	};
+    std::string unparse();
+private:
+    std:: string bool;
+};
+
+//Expr ::= varName '[' Expr ', 'Expr']'
+
+
+
+
+
+
+
+
+
+
+
+	
+
+

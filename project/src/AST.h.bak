@@ -1,0 +1,421 @@
+#ifndef Node_H
+#define Node_H
+
+#include <string>
+#include <iostream>
+
+#include "scanner.h"
+
+class Node ;
+class Program;
+class Stmt;
+class Stmts;
+class Decl;
+class Decls;
+class Expr;
+
+class AnyConst;
+class BinOpExpr;
+
+
+class EmptyStmts;
+class VarName;
+
+/*! This is the super class. It's the base class for all nodes. Program, Stmt, Stmts, Decl, Decls, and Expr are all derived from this class.
+ */
+class Node {
+public:
+    /*! This is a virtual method that returns unparse texts - commented out for now.
+     
+        virtual std::string unparse ( ) { return " This should be pure virtual ";} ;
+        virtual std::string cppCode ( ) { return " This should be pure virtual" ; } ;
+     */
+    
+    /*! This is the virtual destructor. This function deletes the node and deallocates space.
+     */
+    virtual ~Node() { }
+} ;
+
+
+/*! This is an abstract non-terminal class for Program. It is inherited from the Node class.
+ */
+class Program: public Node {
+public:
+    /* This constructor requires two parameters: the current variable name and a list of statements.
+        \param *v the reference to the variable name in the Program, in 'VarName'
+        \param *s the reference to the list of Statements in the Program, in 'Stmts'
+     */
+    Program(VarName *v, Stmts *s): varName(v), stmts(s) {};
+    std::string unparse();
+private:
+    VarName * varName;
+    Stmts * stmts;
+};
+
+/*! This is an abstract non-terminal class for Stmt, which is a Statement. It is inherited from the Node class.
+ */
+class Stmt: public Node {
+public:
+    Stmt();
+    /* This constructor requires two parameters: an expression format in the text and the current variable name.
+        \param *expr the reference to an expression in the Program, in 'Expr'
+        \param *v the reference to the variable name in the Program, in 'VarName'
+     */
+    Stmt(Expr* expr, VarName* v);
+private:
+    Expr* expr;
+    VarName *v;
+};
+
+/*! This is an abstract non-terminal class for Stmts, which is a list of Statements. It is inherited from the Node class.
+ */
+class Stmts: public Node {
+public:
+    Stmts();
+    /* This constructor requires one parameter: the current list of Statements.
+        \param *s the reference to the current list of Statements in the Program, in 'Stmts'
+     */
+    Stmts(Stmts* s);
+    
+    /* This constructor requires two parameters: the current list of Statements, and the next list of Statments
+        \param *s the reference to the current list of Statements in the Program, in 'Stmts'
+        \param *next the reference to the next list of Statements in the Program, in 'Stmts'
+     */
+    Stmts(Stmts* s, Stmts* next) {
+        currentState = s;
+        nextState = next;
+    }
+private:
+    Stmts* currentState;
+    Stmts* nextState;
+    Stmts* left;
+    Stmts* right;
+};
+
+
+/*! This is an abstract non-terminal class for Decl, which is a Declaration. It is inherited from the Node class.
+ */
+class Decl: public Node {
+public:
+    Decl();
+    /* This constructor requires one parameter: the current inputted variable name
+        \param *v the reference to the current variable name in the Program, in 'VarName'
+     */
+    Decl(VarName *v) {
+        variableName = v;
+    }
+private:
+    VarName *variableName;
+};
+
+
+/*! This is an abstract non-terminal class for Decls, which is a list of Declarations. It is inherited from the Node class.
+ */
+class Decls: public Node {
+public:
+    Decls();
+    
+    /* This constructor requires two parameters: the declaration to the left of current position, and the list of declarations to the right
+        \param *l the reference to the declaration to the left in the Program, in 'Decl'
+        \param *r the reference to the list of declarations to the right in the Program, in 'Decls'
+     */
+    Decls(Decl* l, Decls *r) {
+        left = l;
+        right = r;
+    }
+private:
+    Decl* left;
+    Decls* right;
+};
+
+/*! This is an abstract class for IntegerKwd, which is the Integer Keyword. It is inherited from the Decl class.
+ */
+class IntegerKwd: public Decl {
+public:
+    
+    /* This constructor requires one parameter: the inputted text that is the integer keyword
+        \param a the integer keyword in the Program, in 'string'
+     */
+    IntegerKwd(std::string a) {
+        value = a;
+    }
+    std::string unparse();
+    std::string cppCode() {
+        return "this is integerKwd";
+    }
+private:
+    std::string value;
+};
+
+
+/*! This is an abstract class for FloatKwd, which is the Float Keyword. It is inherited from the Decl class.
+ */
+class FloatKwd: public Decl {
+public:
+    
+    /* This constructor requires one parameter: the inputted text that is the float keyword
+        \param a the float keyword in the Program, in 'string'
+     */
+    FloatKwd(std::string a) {
+        value = a;
+    }
+    std::string unparse();
+    std::string cppCode() {
+        return "this is floatKwd";
+    }
+private:
+    std::string value;
+};
+
+
+/*! This is an abstract class for StringKwd, which is the String Keyword. It is inherited from the Decl class.
+ */
+class StringKwd: public Decl {
+public:
+    
+    /* This constructor requires one parameter: the inputted text that is the string keyword
+        \param a the string keyword in the Program, in 'string'
+     */
+    StringKwd(std::string a) {
+        value = a;
+    }
+    std::string unparse();
+    std::string cppCode() {
+        return "this is stringKwd";
+    }
+private:
+    std::string value;
+
+};
+
+
+/*! This is an abstract class for BoolKwd, which is the Boolean Keyword. It is inherited from the Decl class.
+ */
+class BoolKwd: public Decl {
+public:
+    
+    /* This constructor requires one parameter: the inputted text that is the boolean keyword
+        \param a the boolean keyword in the Program, in 'string'
+     */
+    BoolKwd(std::string a) {
+        value = a;
+    }
+    std::string unparse();
+    std::string cppCode() {
+        return "this is boolKwd";
+    }
+private:
+    std::string value;
+};
+
+/*! This is an abstract class for EmptyStmts, which is a list of empty statements. It is inherited from the Stmts class.
+ */
+class EmptyStmts: public Stmts {
+public:
+    EmptyStmts();
+    
+    /* This constructor requires one parameter: the current list of empty statements.
+        \param s the list of empty statements in the Program, in 'Stmts'
+     */
+    EmptyStmts(Stmts* s) {
+        states = s;
+    }
+    std:: string unparse();
+private:
+    Stmts* states;
+};
+
+
+/*! This is an abstract class for TwoStmts, which are two statements one after another. It is inherited from the Stmts class.
+ */
+class TwoStmts: public Stmts {
+public:
+    TwoStmts();
+    
+    /* This constructor requires one parameter: the current statement that contains two separate statements.
+        \param statement the reference to the current statement in the Program, that contains two statements, in 'Stmt'     
+     */
+    TwoStmts(Stmt *statement) {
+        currStatement = statement;
+    };
+    std::string unparse();
+private:
+    Stmt *currStatement;
+    Stmts *statements;
+};
+
+/*! This is an abstract non-terminal class for Expr, which is an Expression. It is inherited from the Node class.
+ */
+class Expr: public Node {
+    std::string unparse ();
+    std::string cppCode;
+};
+
+/*! This is an abstract class for AnyConstExpr, which represents any constant expressions. It is inherited from the Expr class.
+ */
+class AnyConstExpr: public Expr {
+public:
+    /* This constructor requires one parameter: the current constant expression.
+        \param statement the constant expression in the Program, in 'string'
+     */
+    AnyConstExpr(std::string s) : constString(s) {};
+    std::string unparse();
+private:
+    std::string constString;
+    
+};
+
+/*! This is an abstract class for BinOpExpr, which represents an binaryop expression. It is inherited from the Expr class.
+ */
+class BinOpExpr: public Expr {
+public:
+    
+    /* This constructor requires three parameters: the expression on the left of the current position, the current text, and the expression on the right.
+        \param *l the reference to the expression on the left of the current position
+        \param o the current text in the test file
+        \param *r the reference to the expression on the right of the current position
+     */
+    BinOpExpr(Expr *l, std:: string o, Expr *r): left(l), op(o),right(r) {
+        left = l;
+        op = o;
+        right = r;
+    };
+    std::string unparse();
+private:
+    Expr* left;
+    std:: string op;
+    Expr* right;
+};
+
+
+/*! This is an abstract class for VarName, which represents an expression for a variable name. It is inherited from the Expr class.
+ */
+class VarName: public Expr {
+public:
+    /* This constructor requires one parameter: the current variable name expression.
+        \param s the variable name expression in the Program, in 'string'
+     */
+    VarName(std::string s) {};
+    std::string unparse();
+private:
+    std::string var;
+};
+
+/*! This is an abstract class for TrueKwd, which represents an expression for a true keyword. It is inherited from the Expr class.
+ */
+class TrueKwd: public Expr {
+public:
+    
+    /* This constructor requires one parameter: the current true keyword expression.
+        \param a the true keyword expression in the Program, in 'string'
+     */
+    TrueKwd(std::string a) {
+        value = a;
+    }
+    std::string unparse();
+    std::string cppCode() {
+        return "this is trueKwd";
+    }
+private:
+    std::string value;
+};
+
+/*! This is an abstract class for FalseKwd, which represents an expression for a false keyword. It is inherited from the Expr class.
+ */
+class FalseKwd: public Expr {
+public:
+    
+    /* This constructor requires one parameter: the current false keyword expression.
+        \param a the false keyword expression in the Program, in 'string'
+     */
+    FalseKwd(std::string a) {
+        value = a;
+    }
+    std::string unparse();
+    std::string cppCode() {
+        return "this is falseKwd";
+    }
+private:
+    std::string value;
+};
+
+/*! This is an abstract class for IntConst, which represents an expression for an integer constant. It is inherited from the Expr class.
+ */
+class IntConst: public Expr {
+public:
+    
+    /* This constructor requires one parameter: the current integer constant expression.
+        \param a the integer constant expression in the Program, in 'string'
+     */
+    IntConst(std::string a) {
+        value = a;
+    }
+    std::string unparse();
+    std::string cppCode() {
+        return "this is intConst";
+    }
+private:
+    std::string value;
+};
+
+
+/*! This is an abstract class for FloatConst, which represents an expression for an float constant. It is inherited from the Expr class.
+ */
+class FloatConst: public Expr {
+public:
+    
+    /* This constructor requires one parameter: the current float constant expression.
+        \param a the float constant expression in the Program, in 'string'
+     */
+    FloatConst(std::string a) {
+        value = a;
+    }
+    std::string unparse();
+    std::string cppCode() {
+        return "this is floatConst";
+    }
+private:
+    std::string value;
+};
+
+
+/*! This is an abstract class for StringConst, which represents an expression for a string constant. It is inherited from the Expr class.
+ */
+class StringConst: public Expr {
+public:
+    
+    /* This constructor requires one parameter: the current string constant expression.
+        \param a the string constant expression in the Program, in 'string'
+     */
+    StringConst(std::string a) {
+        value = a;
+    }
+    std::string unparse();
+    std::string cppCode() {
+        return "this is stringConst";
+    }
+private:
+    std::string value;
+};
+
+
+/*! This is an abstract class for MatrixREFExpr, which represents an expression for a matrix expression. It is inherited from the Expr class.
+ */
+class MatrixREFExpr: public Expr {
+public:
+    
+    /* This constructor requires one parameter: the current matrix expression.
+        \param a the string matrix expression in the Program, in 'string'
+     */
+
+    MatrixREFExpr(std::string s) {
+        value = s;
+    };
+    std::string unparse();
+private:
+    std:: string value;
+};
+
+
+#endif
+

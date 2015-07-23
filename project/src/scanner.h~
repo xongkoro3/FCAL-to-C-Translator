@@ -1,0 +1,92 @@
+/* Chau Nguyen and Shuai He */
+/* A small meaningless comment - tag iteration 1*/
+#ifndef SCANNER_H
+#define SCANNER_H
+
+#include <regex.h>
+#include <string>
+#include <vector>
+#include "regex.h"
+
+class Token ;
+class Scanner;
+
+/* This enumerated type is used to keep track of what kind of
+   construct was matched. 
+ */
+
+enum tokenEnumType { 
+
+	printKwd,floatKwd, boolKwd,
+	trueKwd, falseKwd, stringKwd,  matrixKwd,
+	letKwd, inKwd, endKwd, ifKwd, thenKwd, elseKwd,
+	forKwd, whileKwd, intKwd,
+
+	// Constants
+	intConst, floatConst, stringConst, 
+
+	// Names
+	variableName ,
+
+	// Punctuation
+	leftParen, rightParen, 
+	leftCurly, rightCurly, 
+	leftSquare, rightSquare,
+
+	comma, semiColon, colon,
+
+	//Operators
+	assign, 
+	plusSign, star, dash, forwardSlash,
+	lessThan, lessThanEqual, greaterThan, greaterThanEqual,
+	equalsEquals, notEquals,
+	andOp, orOp, notOp,
+
+	// Special terminal types
+	endOfFile ,
+	lexicalError
+} ;
+typedef enum tokenEnumType tokenType ;
+
+// Below you need to write your class definitions for Token and Scanner.
+class Token{
+public:
+    Token();
+    //Token(std::string, tokenType, Token*);
+    std:: string lexeme;
+    tokenType terminal;
+    Token* next;
+    Token(){
+		terminal = lexicalError;
+		next = NULL;
+		lexeme = (char*)"";
+	}
+	Token(string a, tokenType b, Token* c){
+		lexeme = a;
+		terminal = b;
+		next = c;
+	}
+	int lexeme_length;
+	int begin_line;
+};
+
+class Scanner{
+public:
+    Scanner();
+    Token* scan(const char*);
+    Token* tokenMaker(const char*);
+    bool tokenMaker_bool(tokenType,const char*,const char*);
+    std::vector<regex_t*>expressions;
+    regex_t* makeRegex(const char*);
+    int matchRegex(regex_t*,const char*);
+    int consumeWhiteSpaceAndComments(regex_t*,regex_t*,regex_t*,const char*);
+    //bool helper_areWeInFrame(const char*);
+    void addToArray(int,const char*,std::vector<regex_t*>& expressions);
+    regex_t* whiteSpace;
+    regex_t* blockComment;
+    regex_t* lineComment;
+
+};
+
+
+#endif /* SCANNER_H */
